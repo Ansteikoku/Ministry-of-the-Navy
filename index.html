@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>海軍省 - ホーム</title>
+<style>
+    body { margin: 0; font-family: sans-serif; background: #fff; }
+
+    /* 軍艦シルエット */
+    #ship {
+        width: 100%;
+        height: 300px;
+        background: url("ship_black.png") center/contain no-repeat;
+        position: fixed;
+        top: 0;
+        left: 0;
+        opacity: 1;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+
+    /* フェードアウト */
+    body.scrolled #ship {
+        opacity: 0;
+    }
+
+    header {
+        background: #001f3f;
+        color: #fff;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+    }
+    header img {
+        height: 50px;
+        margin-right: 15px;
+    }
+    nav a {
+        color: #fff;
+        margin-right: 20px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .container {
+        margin-top: 350px;
+        padding: 20px;
+    }
+    .news-box {
+        border-left: 4px solid #001f3f;
+        padding: 10px 15px;
+        margin: 15px 0;
+    }
+</style>
+</head>
+<body>
+
+<div id="ship"></div>
+
+<header>
+    <img src="logo.png" alt="logo">
+    <nav>
+        <a href="index.html">ホーム</a>
+        <a href="news.html">ニュース</a>
+        <a href="members.html">部員一覧</a>
+    </nav>
+</header>
+
+<div class="container">
+    <h2>最新ニュース</h2>
+    <div id="latest-news" class="news-box">読み込み中...</div>
+</div>
+
+<!-- Supabase 初期化 -->
+<script type="module" src="supabase.js"></script>
+
+<script type="module">
+import { supabase } from "./supabase.js";
+
+window.addEventListener("scroll", () => {
+    if (window.scrollY > 50) document.body.classList.add("scrolled");
+    else document.body.classList.remove("scrolled");
+});
+
+// 最新ニュース1件
+async function loadLatestNews() {
+    const { data, error } = await supabase
+        .from("news")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+    const el = document.getElementById("latest-news");
+
+    if (error || data.length === 0) {
+        el.innerHTML = "ニュースなし";
+        return;
+    }
+
+    const n = data[0];
+    el.innerHTML = `
+        <strong>${n.title}</strong><br>
+        <small>${n.created_at}</small><br>
+        <a href="news_detail.html?id=${n.id}">続きを読む →</a>
+    `;
+}
+
+loadLatestNews();
+</script>
+
+</body>
+</html>
