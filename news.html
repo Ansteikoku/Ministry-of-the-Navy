@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ニュース一覧 - 海軍省</title>
+<style>
+    body { font-family: sans-serif; padding: 20px; }
+    .news-item {
+        border-bottom: 1px solid #aaa;
+        padding: 10px 0;
+    }
+</style>
+</head>
+<body>
+
+<h1>ニュース一覧</h1>
+<div id="news-list">読み込み中...</div>
+
+<script type="module" src="supabase.js"></script>
+<script type="module">
+import { supabase } from "./supabase.js";
+
+async function loadNews() {
+    const { data, error } = await supabase
+        .from("news")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    const box = document.getElementById("news-list");
+
+    if (error) {
+        box.innerHTML = "読み込み失敗";
+        return;
+    }
+
+    box.innerHTML = data.map(n => `
+        <div class="news-item">
+            <strong>${n.title}</strong><br>
+            <small>${n.created_at}</small><br>
+            <a href="news_detail.html?id=${n.id}">詳細 →</a>
+        </div>
+    `).join("");
+}
+
+loadNews();
+</script>
+</body>
+</html>
